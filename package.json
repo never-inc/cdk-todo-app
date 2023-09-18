@@ -11,6 +11,7 @@
     "cdk": "cdk"
   },
   "devDependencies": {
+    "@types/express": "^4.17.17",
     "@types/jest": "^29.5.4",
     "@types/node": "20.5.9",
     "aws-cdk": "2.96.2",
@@ -20,7 +21,6 @@
     "typescript": "~5.2.2"
   },
   "dependencies": {
-    "@aws-sdk/client-cognito-identity-provider": "^3.414.0",
     "@aws-sdk/client-dynamodb": "^3.414.0",
     "@aws-sdk/lib-dynamodb": "^3.414.0",
     "@vendia/serverless-express": "^4.10.4",
