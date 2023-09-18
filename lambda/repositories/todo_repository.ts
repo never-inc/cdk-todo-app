@@ -24,7 +24,7 @@ export const setTodo = async (todoId: string, userId: string, todoText: string) 
   return output
 }
 
-export const fetchTodos = async (userId: string) => {
+export const fetchTodos = async (userId: string, limit: number, createdAt: string | undefined) => {
   const command = new QueryCommand({
     TableName: tableName,
     IndexName: 'userIdCreatedAtIndex',
@@ -32,7 +32,15 @@ export const fetchTodos = async (userId: string) => {
     ExpressionAttributeValues: {
       ':userId': userId,
     },
-    Limit: 20,
+    Limit: limit,
+    ...(createdAt != null
+      ? {
+          ExclusiveStartKey: {
+            userId: userId,
+            createdAt: createdAt,
+          },
+        }
+      : {}),
     ScanIndexForward: false, // 降順
   })
   const output = await documentClient.send(command)
@@ -60,8 +68,9 @@ export const updateTodo = async (todoId: string, userId: string, todoText: strin
       todoId: todoId,
     },
     UpdateExpression: 'set todoText = :todoText, updatedAt = :updatedAt',
-    ConditionExpression: 'attribute_exists(todoId)',
+    ConditionExpression: 'attribute_exists(todoId) AND userId = :userId',
     ExpressionAttributeValues: {
+      ':userId': userId,
       ':todoText': todoText,
       ':updatedAt': dateISOString,
     },
@@ -72,11 +81,15 @@ export const updateTodo = async (todoId: string, userId: string, todoText: strin
   return output
 }
 
-export const deleteTodo = async (todoId: string) => {
+export const deleteTodo = async (todoId: string, userId: string) => {
   const command = new DeleteCommand({
     TableName: tableName,
     Key: {
       todoId: todoId,
+    },
+    ConditionExpression: 'userId = :userId',
+    ExpressionAttributeValues: {
+      ':userId': userId,
     },
     ReturnValues: 'ALL_OLD',
   })
