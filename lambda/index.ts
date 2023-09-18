@@ -8,12 +8,14 @@ import * as todo_repository from './repositories/todo_repository'
 const app = express()
 app.use(express.json())
 app.use((req, res, next) => {
+  // CORSエラーを解消
   res.header('Access-Control-Allow-Origin', '*')
   res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE')
   res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization')
   next()
 })
 
+// アクセストークンを検証
 const verifyToken = async (req: express.Request, res: express.Response, next: NextFunction) => {
   const authorization = req.headers.authorization
   const accessToken = authorization?.split(' ')[1]
@@ -32,9 +34,10 @@ const verifyToken = async (req: express.Request, res: express.Response, next: Ne
   return
 }
 
+// 一覧取得
 app.get('/todos', verifyToken, async (req, res) => {
   try {
-    const userId = String(res.locals.userId)
+    const userId = res.locals.userId as string
     const createdAt: string | undefined = req.query.created_at as string | undefined
     const result = await todo_repository.fetchTodos(userId, 20, createdAt)
     res.status(200).json(result)
@@ -44,6 +47,7 @@ app.get('/todos', verifyToken, async (req, res) => {
   }
 })
 
+// 取得
 app.get('/todos/:todoId', verifyToken, async (req, res) => {
   try {
     const todoId = req.params.todoId
@@ -55,13 +59,14 @@ app.get('/todos/:todoId', verifyToken, async (req, res) => {
   }
 })
 
+// 作成
 app.post('/todos/:todoId', verifyToken, async (req, res) => {
   try {
     const todoText: string | undefined = req.body.todoText as string | undefined
     if (!todoText) {
       throw Error('todoText is empty')
     }
-    const userId = String(res.locals.userId)
+    const userId = res.locals.userId as string
     const todoId = req.params.todoId
     const result = await todo_repository.setTodo(todoId, userId, todoText)
     res.status(200).json(result)
@@ -71,13 +76,14 @@ app.post('/todos/:todoId', verifyToken, async (req, res) => {
   }
 })
 
+// 更新
 app.put('/todos/:todoId', verifyToken, async (req, res) => {
   try {
     const todoText: string | undefined = req.body.todoText as string | undefined
     if (!todoText) {
       throw Error('todoText is empty')
     }
-    const userId = String(res.locals.userId)
+    const userId = res.locals.userId as string
     const todoId = req.params.todoId
     const result = await todo_repository.updateTodo(todoId, userId, todoText)
     res.status(200).json(result)
@@ -87,9 +93,10 @@ app.put('/todos/:todoId', verifyToken, async (req, res) => {
   }
 })
 
+// 削除
 app.delete('/todos/:todoId', verifyToken, async (req, res) => {
   try {
-    const userId = String(res.locals.userId)
+    const userId = res.locals.userId as string
     const todoId = req.params.todoId
     const result = await todo_repository.deleteTodo(todoId, userId)
     res.status(200).json(result)
