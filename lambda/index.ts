@@ -25,7 +25,7 @@ const verifyToken = async (req: express.Request, res: express.Response, next: Ne
       res.locals.userId = userId
       next()
     } else {
-      return res.status(401).json({ message: 'Unauthorized' })
+      throw Error('Unauthorized')
     }
   } catch (e) {
     console.error(e)
