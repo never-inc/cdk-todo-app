@@ -94,7 +94,7 @@ export class CdkTodoAppStack extends cdk.Stack {
     /**
      * Amplify Hosting
      */
-    const gitHubToken = '' // GitHubのPersonal Token（AWS Secret Manager経由で設定が良いみたい）
+    const gitHubToken = '' // GitHubのPersonal Token（AWS Secret Manager経由で設定推奨）
     const gitHubRepositoryUrl = 'https://github.com/never-inc/todo_app_frontend' // フロントエンドのリポジトリURL
 
     const amplifyApp = new CfnApp(this, 'todo-app-frontend', {
