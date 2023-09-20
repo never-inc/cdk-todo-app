@@ -94,72 +94,72 @@ export class CdkTodoAppStack extends cdk.Stack {
     /**
      * Amplify Hosting
      */
-    // const gitHubToken = '' // GitHubのPersonal Token（AWS Secret Manager経由で設定が良いみたい）
-    // const gitHubRepositoryUrl = '' // フロントエンドのリポジトリURL
+    const gitHubToken = '' // GitHubのPersonal Token（AWS Secret Manager経由で設定が良いみたい）
+    const gitHubRepositoryUrl = '' // フロントエンドのリポジトリURL
 
-    // const amplifyApp = new CfnApp(this, 'todo-app-frontend', {
-    //   name: 'todo-app-frontend',
-    //   oauthToken: gitHubToken,
-    //   repository: gitHubRepositoryUrl,
-    //   enableBranchAutoDeletion: true,
-    //   buildSpec: BuildSpec.fromObjectToYaml({
-    //     version: 1,
-    //     frontend: {
-    //       phases: {
-    //         preBuild: {
-    //           commands: ['npm ci'],
-    //         },
-    //         build: {
-    //           commands: ['npm run build'],
-    //         },
-    //       },
-    //       artifacts: {
-    //         baseDirectory: '.next',
-    //         files: ['**/*'],
-    //       },
-    //       cache: {
-    //         paths: ['node_modules/**/*'],
-    //       },
-    //     },
-    //   }).toBuildSpec(),
-    //   platform: 'WEB_COMPUTE', // SSRをする場合に必要
-    //   customRules: [
-    //     {
-    //       source: '/<*>',
-    //       target: '/index.html',
-    //       status: '404-200',
-    //     },
-    //   ],
-    //   autoBranchCreationConfig: {
-    //     enableAutoBranchCreation: true,
-    //     enableAutoBuild: true,
-    //   },
-    // })
+    const amplifyApp = new CfnApp(this, 'todo-app-frontend', {
+      name: 'todo-app-frontend',
+      oauthToken: gitHubToken,
+      repository: gitHubRepositoryUrl,
+      enableBranchAutoDeletion: true,
+      buildSpec: BuildSpec.fromObjectToYaml({
+        version: 1,
+        frontend: {
+          phases: {
+            preBuild: {
+              commands: ['npm ci'],
+            },
+            build: {
+              commands: ['npm run build'],
+            },
+          },
+          artifacts: {
+            baseDirectory: '.next',
+            files: ['**/*'],
+          },
+          cache: {
+            paths: ['node_modules/**/*'],
+          },
+        },
+      }).toBuildSpec(),
+      platform: 'WEB_COMPUTE', // SSRをする場合に必要
+      customRules: [
+        {
+          source: '/<*>',
+          target: '/index.html',
+          status: '404-200',
+        },
+      ],
+      autoBranchCreationConfig: {
+        enableAutoBranchCreation: true,
+        enableAutoBuild: true,
+      },
+    })
 
-    // new CfnBranch(this, 'main-branch', {
-    //   appId: amplifyApp.attrAppId,
-    //   branchName: 'main', // ブランチ名
-    //   enableAutoBuild: true,
-    //   enablePerformanceMode: false,
-    //   enablePullRequestPreview: false,
-    //   stage: 'PRODUCTION',
-    //   framework: 'Next.js - SSR',
-    //   environmentVariables: [
-    //     // フロントエンドからCognitoを利用するために必要
-    //     {
-    //       name: 'NEXT_PUBLIC_COGNITO_USER_POOL_ID',
-    //       value: userPool.userPoolId,
-    //     },
-    //     {
-    //       name: 'NEXT_PUBLIC_COGNITO_USER_POOL_CLIENT_ID',
-    //       value: userPoolClient.userPoolClientId,
-    //     },
-    //     // Lambdaが設定されたAPI GatewayへアクセスするためのURL
-    //     {
-    //       name: 'NEXT_PUBLIC_REST_API_BASE_URL',
-    //       value: restApi.url,
-    //     },
-    //   ],
-    // })
+    new CfnBranch(this, 'main-branch', {
+      appId: amplifyApp.attrAppId,
+      branchName: 'main', // ブランチ名
+      enableAutoBuild: true,
+      enablePerformanceMode: false,
+      enablePullRequestPreview: false,
+      stage: 'PRODUCTION',
+      framework: 'Next.js - SSR',
+      environmentVariables: [
+        // フロントエンドからCognitoを利用するために必要
+        {
+          name: 'NEXT_PUBLIC_COGNITO_USER_POOL_ID',
+          value: userPool.userPoolId,
+        },
+        {
+          name: 'NEXT_PUBLIC_COGNITO_USER_POOL_CLIENT_ID',
+          value: userPoolClient.userPoolClientId,
+        },
+        // Lambdaが設定されたAPI GatewayへアクセスするためのURL
+        {
+          name: 'NEXT_PUBLIC_REST_API_BASE_URL',
+          value: restApi.url,
+        },
+      ],
+    })
   }
 }
