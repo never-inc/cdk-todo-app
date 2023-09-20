@@ -6,6 +6,36 @@ const dbClient = new DynamoDBClient(config)
 const documentClient = DynamoDBDocumentClient.from(dbClient)
 const tableName = 'Todo'
 
+export const fetchTodos = async (
+  userId: string,
+  limit: number,
+  todoId: string | undefined,
+  createdAt: string | undefined,
+) => {
+  const command = new QueryCommand({
+    TableName: tableName,
+    IndexName: 'userIdCreatedAtIndex',
+    KeyConditionExpression: 'userId = :userId',
+    ExpressionAttributeValues: {
+      ':userId': userId,
+    },
+    Limit: limit,
+    ...(createdAt != null && todoId != null
+      ? {
+          ExclusiveStartKey: {
+            userId: userId,
+            todoId: todoId,
+            createdAt: createdAt,
+          },
+        }
+      : {}),
+    ScanIndexForward: false, // 降順
+  })
+  const output = await documentClient.send(command)
+  console.log(JSON.stringify(output))
+  return output
+}
+
 export const setTodo = async (todoId: string, userId: string, todoText: string) => {
   const dateISOString = new Date().toISOString()
   const command = new PutItemCommand({
@@ -18,30 +48,6 @@ export const setTodo = async (todoId: string, userId: string, todoText: string) 
       updatedAt: { S: dateISOString },
     },
     ConditionExpression: 'attribute_not_exists(todoId)', // todoIdが重複しないようにする
-  })
-  const output = await documentClient.send(command)
-  console.log(JSON.stringify(output))
-  return output
-}
-
-export const fetchTodos = async (userId: string, limit: number, createdAt: string | undefined) => {
-  const command = new QueryCommand({
-    TableName: tableName,
-    IndexName: 'userIdCreatedAtIndex',
-    KeyConditionExpression: 'userId = :userId',
-    ExpressionAttributeValues: {
-      ':userId': userId,
-    },
-    Limit: limit,
-    ...(createdAt != null
-      ? {
-          ExclusiveStartKey: {
-            userId: userId,
-            createdAt: createdAt,
-          },
-        }
-      : {}),
-    ScanIndexForward: false, // 降順
   })
   const output = await documentClient.send(command)
   console.log(JSON.stringify(output))

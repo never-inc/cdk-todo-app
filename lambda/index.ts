@@ -38,20 +38,9 @@ const verifyToken = async (req: express.Request, res: express.Response, next: Ne
 app.get('/todos', verifyToken, async (req, res) => {
   try {
     const userId = res.locals.userId as string
+    const todoId: string | undefined = req.query.todo_id as string | undefined
     const createdAt: string | undefined = req.query.created_at as string | undefined
-    const result = await todo_repository.fetchTodos(userId, 20, createdAt)
-    res.status(200).json(result)
-  } catch (e) {
-    console.error(e)
-    res.status(400).json({ message: e instanceof Error ? e.message : 'error' })
-  }
-})
-
-// 取得
-app.get('/todos/:todoId', verifyToken, async (req, res) => {
-  try {
-    const todoId = req.params.todoId
-    const result = await todo_repository.fetchTodo(todoId)
+    const result = await todo_repository.fetchTodos(userId, 20, todoId, createdAt)
     res.status(200).json(result)
   } catch (e) {
     console.error(e)
@@ -69,6 +58,18 @@ app.post('/todos/:todoId', verifyToken, async (req, res) => {
     const userId = res.locals.userId as string
     const todoId = req.params.todoId
     const result = await todo_repository.setTodo(todoId, userId, todoText)
+    res.status(200).json(result)
+  } catch (e) {
+    console.error(e)
+    res.status(400).json({ message: e instanceof Error ? e.message : 'error' })
+  }
+})
+
+// 取得
+app.get('/todos/:todoId', verifyToken, async (req, res) => {
+  try {
+    const todoId = req.params.todoId
+    const result = await todo_repository.fetchTodo(todoId)
     res.status(200).json(result)
   } catch (e) {
     console.error(e)
