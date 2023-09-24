@@ -14,7 +14,6 @@ describe('todo_repository', (): void => {
   })
 
   test('CRUDテスト', async () => {
-    // テスト
     const todoId = v4()
     const userId = 'test_user_id'
 
