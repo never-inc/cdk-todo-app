@@ -18,22 +18,24 @@ describe('todo_repository', (): void => {
     const userId = 'test_user_id'
 
     // 作成
-    await todo_repository.setTodo(todoId, userId, 'todo')
     {
+      const todoText = 'todo'
+      await todo_repository.setTodo(todoId, userId, todoText)
       const result = await todo_repository.fetchTodo(todoId)
       expect(result.Item?.todoId as string).toEqual(todoId)
     }
 
     // 更新
-    await todo_repository.updateTodo(todoId, userId, 'todoUpdate')
     {
+      const todoText = 'todoUpdate'
+      await todo_repository.updateTodo(todoId, userId, todoText)
       const result = await todo_repository.fetchTodo(todoId)
-      expect(result.Item?.todoText as string).toEqual('todoUpdate')
+      expect(result.Item?.todoText as string).toEqual(todoText)
     }
 
     // 削除
-    await todo_repository.deleteTodo(todoId, userId)
     {
+      await todo_repository.deleteTodo(todoId, userId)
       const result = await todo_repository.fetchTodo(todoId)
       expect(result.Item).toBeUndefined()
     }
