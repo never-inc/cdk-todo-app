@@ -1,5 +1,5 @@
-import { dynamoDbClientConfigure } from '.'
-import * as todo_repository from '../lambda/repositories/todo_repository'
+import { dynamoDbClientConfigure } from '../configure'
+import * as todo_repository from '../../lambda/repositories/todo_repository'
 import { v4 } from 'uuid'
 
 describe('todo_repository', (): void => {
