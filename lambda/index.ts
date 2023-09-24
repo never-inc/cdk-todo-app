@@ -68,8 +68,12 @@ app.post('/todos/:todoId', verifyToken, async (req, res) => {
 // 取得
 app.get('/todos/:todoId', verifyToken, async (req, res) => {
   try {
+    const userId = res.locals.userId as string
     const todoId = req.params.todoId
     const result = await todo_repository.fetchTodo(todoId)
+    if (result.Item != null && result.Item?.userId != userId) {
+      throw Error('Invalid userId')
+    }
     res.status(200).json(result)
   } catch (e) {
     console.error(e)
