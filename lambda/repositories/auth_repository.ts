@@ -8,6 +8,6 @@ export const verifyAccessToken = async (accessToken: string) => {
   })
   const payload = await verifier.verify(accessToken)
   const userId = payload.sub
-  console.log('userId', payload.sub)
+  console.log('userId', userId)
   return userId
 }
