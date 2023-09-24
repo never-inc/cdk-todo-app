@@ -7,3 +7,7 @@ node_modules
 .cdk.staging
 cdk.out
 sh
+
+# env
+.env
+.env.local

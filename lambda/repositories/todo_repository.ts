@@ -1,7 +1,7 @@
 import { DynamoDBDocumentClient, GetCommand, UpdateCommand, DeleteCommand, QueryCommand } from '@aws-sdk/lib-dynamodb'
 import { PutItemCommand, DynamoDBClient, DynamoDBClientConfig } from '@aws-sdk/client-dynamodb'
 
-const config: DynamoDBClientConfig = {}
+export const config: DynamoDBClientConfig = {}
 const dbClient = new DynamoDBClient(config)
 const documentClient = DynamoDBDocumentClient.from(dbClient)
 const tableName = 'Todo'

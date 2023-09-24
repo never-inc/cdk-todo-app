@@ -143,8 +143,8 @@ Resources:
     Properties:
       Code:
         S3Bucket:
-          Fn::Sub: cdk-hnb659fds-assets-${AWS::AccountId}-ap-northeast-1
-        S3Key: 60bd323a184fe6da978b053cffda982b00e614be01491d04b8ee697de6c8a7d4.zip
+          Fn::Sub: cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}
+        S3Key: 7967b4b507a5aa52fc8cbf195bcb47c1e16c8cff277bfe3bc557ec36131cefb3.zip
       Environment:
         Variables:
           COGNITO_USER_POOL_ID:
@@ -165,7 +165,7 @@ Resources:
       - todoapplambdaServiceRoleCFD3B80A
     Metadata:
       aws:cdk:path: CdkTodoAppStack/todo-app-lambda/Resource
-      aws:asset:path: /Users/shohei/project/todo_app/cdk-todo-app/cdk.out/asset.60bd323a184fe6da978b053cffda982b00e614be01491d04b8ee697de6c8a7d4
+      aws:asset:path: /Users/shohei/project/todo_app/cdk-todo-app/cdk.out/asset.7967b4b507a5aa52fc8cbf195bcb47c1e16c8cff277bfe3bc557ec36131cefb3
       aws:asset:is-bundled: true
       aws:asset:property: Code
   todoapprestapiF3D03277:
@@ -174,7 +174,7 @@ Resources:
       Name: todo-app-rest-api
     Metadata:
       aws:cdk:path: CdkTodoAppStack/todo-app-rest-api/Resource
-  todoapprestapiDeployment5ECDDF65ca02d78ce5c1540771da59ae4cb2fb0b:
+  todoapprestapiDeployment5ECDDF653c23a71556cad65a76765bf0a3edd722:
     Type: AWS::ApiGateway::Deployment
     Properties:
       Description: Automatically created by the RestApi construct
@@ -190,7 +190,7 @@ Resources:
     Type: AWS::ApiGateway::Stage
     Properties:
       DeploymentId:
-        Ref: todoapprestapiDeployment5ECDDF65ca02d78ce5c1540771da59ae4cb2fb0b
+        Ref: todoapprestapiDeployment5ECDDF653c23a71556cad65a76765bf0a3edd722
       RestApiId:
         Ref: todoapprestapiF3D03277
       StageName: v1
@@ -221,7 +221,11 @@ Resources:
       SourceArn:
         Fn::Join:
           - ""
-          - - "arn:aws:execute-api:ap-northeast-1:"
+          - - "arn:"
+            - Ref: AWS::Partition
+            - ":execute-api:"
+            - Ref: AWS::Region
+            - ":"
             - Ref: AWS::AccountId
             - ":"
             - Ref: todoapprestapiF3D03277
@@ -242,7 +246,11 @@ Resources:
       SourceArn:
         Fn::Join:
           - ""
-          - - "arn:aws:execute-api:ap-northeast-1:"
+          - - "arn:"
+            - Ref: AWS::Partition
+            - ":execute-api:"
+            - Ref: AWS::Region
+            - ":"
             - Ref: AWS::AccountId
             - ":"
             - Ref: todoapprestapiF3D03277
@@ -260,7 +268,11 @@ Resources:
         Uri:
           Fn::Join:
             - ""
-            - - arn:aws:apigateway:ap-northeast-1:lambda:path/2015-03-31/functions/
+            - - "arn:"
+              - Ref: AWS::Partition
+              - ":apigateway:"
+              - Ref: AWS::Region
+              - :lambda:path/2015-03-31/functions/
               - Fn::GetAtt:
                   - todoapplambdaCE6DDDEB
                   - Arn
@@ -283,7 +295,11 @@ Resources:
       SourceArn:
         Fn::Join:
           - ""
-          - - "arn:aws:execute-api:ap-northeast-1:"
+          - - "arn:"
+            - Ref: AWS::Partition
+            - ":execute-api:"
+            - Ref: AWS::Region
+            - ":"
             - Ref: AWS::AccountId
             - ":"
             - Ref: todoapprestapiF3D03277
@@ -304,7 +320,11 @@ Resources:
       SourceArn:
         Fn::Join:
           - ""
-          - - "arn:aws:execute-api:ap-northeast-1:"
+          - - "arn:"
+            - Ref: AWS::Partition
+            - ":execute-api:"
+            - Ref: AWS::Region
+            - ":"
             - Ref: AWS::AccountId
             - ":"
             - Ref: todoapprestapiF3D03277
@@ -322,7 +342,11 @@ Resources:
         Uri:
           Fn::Join:
             - ""
-            - - arn:aws:apigateway:ap-northeast-1:lambda:path/2015-03-31/functions/
+            - - "arn:"
+              - Ref: AWS::Partition
+              - ":apigateway:"
+              - Ref: AWS::Region
+              - :lambda:path/2015-03-31/functions/
               - Fn::GetAtt:
                   - todoapplambdaCE6DDDEB
                   - Arn
@@ -335,12 +359,82 @@ Resources:
         Ref: todoapprestapiF3D03277
     Metadata:
       aws:cdk:path: CdkTodoAppStack/todo-app-rest-api/Default/ANY/Resource
+  todoappfrontend:
+    Type: AWS::Amplify::App
+    Properties:
+      AutoBranchCreationConfig:
+        EnableAutoBranchCreation: true
+        EnableAutoBuild: true
+      BuildSpec: |
+        version: 1
+        frontend:
+          phases:
+            preBuild:
+              commands:
+                - npm ci
+            build:
+              commands:
+                - npm run build
+          artifacts:
+            baseDirectory: .next
+            files:
+              - "**/*"
+          cache:
+            paths:
+              - node_modules/**/*
+      CustomRules:
+        - Source: /<*>
+          Status: 404-200
+          Target: /index.html
+      EnableBranchAutoDeletion: true
+      Name: todo-app-frontend
+      OauthToken: ""
+      Platform: WEB_COMPUTE
+      Repository: https://github.com/never-inc/todo_app_frontend
+    Metadata:
+      aws:cdk:path: CdkTodoAppStack/todo-app-frontend
+  mainbranch:
+    Type: AWS::Amplify::Branch
+    Properties:
+      AppId:
+        Fn::GetAtt:
+          - todoappfrontend
+          - AppId
+      BranchName: main
+      EnableAutoBuild: true
+      EnablePerformanceMode: false
+      EnablePullRequestPreview: false
+      EnvironmentVariables:
+        - Name: NEXT_PUBLIC_COGNITO_USER_POOL_ID
+          Value:
+            Ref: todoappuserpoolC22ED3C2
+        - Name: NEXT_PUBLIC_COGNITO_USER_POOL_CLIENT_ID
+          Value:
+            Ref: todoappuserpoolclient81F878F3
+        - Name: NEXT_PUBLIC_REST_API_BASE_URL
+          Value:
+            Fn::Join:
+              - ""
+              - - https://
+                - Ref: todoapprestapiF3D03277
+                - .execute-api.
+                - Ref: AWS::Region
+                - "."
+                - Ref: AWS::URLSuffix
+                - /
+                - Ref: todoapprestapiDeploymentStagev1139D5714
+                - /
+      Framework: Next.js - SSR
+      Stage: PRODUCTION
+    Metadata:
+      aws:cdk:path: CdkTodoAppStack/main-branch
   CDKMetadata:
     Type: AWS::CDK::Metadata
     Properties:
-      Analytics: v2:deflate64:H4sIAAAAAAAA/01QSW7DMAx8S+4Ki6RAl2OSoqcugdueA0VmXTqyaFhyU8PQ36vFMXKaITUzFLmGxztYL+TZLlV5Wmo6wvjhpDqJ0DqMiitDjmH8stjtmbXYfZuZX8hOExp3/ZQ7XpSDkQ2XIfRTHjVGSSJeaNkcS3kwXGJt4S3Bc2+UIzaCZANjwdmQcM+a1BDLzLywtwdpLToLmwihhm2vTui20uIUD2MwzKnRjF1D1obKC9lSJR2e5QDjS5IXaN2mpTR0ok/Yah6aab2rKhypSt/LJOi57xSm4fuO/4ZLZ0rL/BXdD5exlZn3s1OkNWIamSoq3nvX9u7a7kU8F9T25nf1AKt7WC1qS7TseuOoQSgy/gN8ZD/W1AEAAA==
+      Analytics: v2:deflate64:H4sIAAAAAAAA/1WQyW7CMBCGn4W7mYpW6nIEqp66INqekbGHMGB7otgpjaK8e70ERE/zzfbPcgtP93A7kSc/Vfo4NbSF/jNIdRQxtOkVV44CQ//tsVkxG7HcuQufYWkIXbhOlcggdOekZR1Fv+TWYCrJMAgj7VbLjWONBw/v2by0TgViJ0ha6NdcGrJdsSHVJbfQIPzdRnqPwcM8mejDolVHDAvpcZSHPjZcVFMzNpa8j94gZE2VDHiSHfSvuXyNPsxrykNHfMbacGfH8668+KQqr1cg1nPbKMzDVw3/dufIqFb4DcOedQoVilvY2tCuy5vO6zqlFo10aj8MF1GRL0yDyFWp4qMNdRv+KUdestMU8m3prXDwNz+zR5g9wGxy8ETTpnWBLMK62D/Pu6vk/AEAAA==
     Metadata:
       aws:cdk:path: CdkTodoAppStack/CDKMetadata/Default
+    Condition: CDKMetadataAvailable
 Outputs:
   todoapprestapiEndpointEFE3A3B6:
     Value:
@@ -348,11 +442,85 @@ Outputs:
         - ""
         - - https://
           - Ref: todoapprestapiF3D03277
-          - .execute-api.ap-northeast-1.
+          - .execute-api.
+          - Ref: AWS::Region
+          - "."
           - Ref: AWS::URLSuffix
           - /
           - Ref: todoapprestapiDeploymentStagev1139D5714
           - /
+Conditions:
+  CDKMetadataAvailable:
+    Fn::Or:
+      - Fn::Or:
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - af-south-1
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - ap-east-1
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - ap-northeast-1
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - ap-northeast-2
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - ap-south-1
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - ap-southeast-1
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - ap-southeast-2
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - ca-central-1
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - cn-north-1
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - cn-northwest-1
+      - Fn::Or:
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - eu-central-1
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - eu-north-1
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - eu-south-1
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - eu-west-1
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - eu-west-2
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - eu-west-3
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - me-south-1
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - sa-east-1
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - us-east-1
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - us-east-2
+      - Fn::Or:
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - us-west-1
+          - Fn::Equals:
+              - Ref: AWS::Region
+              - us-west-2
 Parameters:
   BootstrapVersion:
     Type: AWS::SSM::Parameter::Value<String>
