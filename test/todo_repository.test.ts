@@ -23,6 +23,7 @@ describe('todo_repository', (): void => {
       await todo_repository.setTodo(todoId, userId, todoText)
       const result = await todo_repository.fetchTodo(todoId)
       expect(result.Item?.todoId as string).toEqual(todoId)
+      expect(result.Item?.todoText as string).toEqual(todoText)
     }
 
     // 更新
