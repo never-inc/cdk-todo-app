@@ -2,7 +2,7 @@ import { dynamoDbClientConfigure } from '.'
 import * as todo_repository from '../lambda/repositories/todo_repository'
 import { v4 } from 'uuid'
 
-describe('sample', (): void => {
+describe('todo_repository', (): void => {
   // テスト開始前に1度だけ呼ばれる
   beforeAll(() => {
     dynamoDbClientConfigure() // DynamoDBClientConfigを設定
@@ -13,7 +13,7 @@ describe('sample', (): void => {
     jest.clearAllMocks()
   })
 
-  test('todo repository crud', async () => {
+  test('CRUDテスト', async () => {
     // テスト
     const todoId = v4()
     const userId = 'test_user_id'
