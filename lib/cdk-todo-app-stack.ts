@@ -1,6 +1,12 @@
 import * as cdk from 'aws-cdk-lib'
 import { Construct } from 'constructs'
-import { UserPool, UserPoolClient, UserPoolClientIdentityProvider, AccountRecovery } from 'aws-cdk-lib/aws-cognito'
+import {
+  UserPool,
+  UserPoolClient,
+  UserPoolOperation,
+  UserPoolClientIdentityProvider,
+  AccountRecovery,
+} from 'aws-cdk-lib/aws-cognito'
 import { Table, AttributeType, BillingMode } from 'aws-cdk-lib/aws-dynamodb'
 import { Runtime } from 'aws-cdk-lib/aws-lambda'
 import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs'
@@ -26,6 +32,7 @@ export class CdkTodoAppStack extends cdk.Stack {
         },
       },
       signInAliases: { email: true, username: false }, // email:true とするとユーザー名にemailが使える emailのみでサインアップ、サインインしたい場合は username: falseにする
+
       autoVerify: { email: true }, // autoVerifyを記述しない場合、emailアドレスの検証が必要
       accountRecovery: AccountRecovery.EMAIL_ONLY,
       removalPolicy: cdk.RemovalPolicy.DESTROY, // DESTROYの場合はスタックを削除するとuserPoolも削除される。本番環境はRetainを推奨
@@ -79,6 +86,26 @@ export class CdkTodoAppStack extends cdk.Stack {
       timeout: cdk.Duration.seconds(30),
     })
     todoTable.grantReadWriteData(lambdaFunction) // DBの読み取り書き込み権限をLambdaに付与
+
+    // サインアップ前に発火するLambda
+    const signUpFunction = new NodejsFunction(this, 'todo-app-cognito-sign-up-lambda', {
+      entry: 'lambda/cognito_sign_up.ts', //lambda 関数のエントリーポイント
+      handler: 'handler', // 実行する関数名
+      runtime: Runtime.NODEJS_18_X,
+      memorySize: 128,
+      timeout: cdk.Duration.seconds(30),
+    })
+    userPool.addTrigger(UserPoolOperation.PRE_SIGN_UP, signUpFunction)
+
+    // サインアップ後の本人確認後に発火するLambda
+    const confirmSignUpFunction = new NodejsFunction(this, 'todo-app-cognito-confirm-sign-up-lambda', {
+      entry: 'lambda/cognito_confirm_sign_up.ts', //lambda 関数のエントリーポイント
+      handler: 'handler', // 実行する関数名
+      runtime: Runtime.NODEJS_18_X,
+      memorySize: 128,
+      timeout: cdk.Duration.seconds(30),
+    })
+    userPool.addTrigger(UserPoolOperation.POST_CONFIRMATION, confirmSignUpFunction)
 
     /**
      * API Gateway

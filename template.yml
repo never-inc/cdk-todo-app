@@ -12,6 +12,15 @@ Resources:
         - email
       EmailVerificationMessage: The verification code to your new account is {####}
       EmailVerificationSubject: Verify your new account
+      LambdaConfig:
+        PostConfirmation:
+          Fn::GetAtt:
+            - todoappcognitoconfirmsignuplambda248ABA3F
+            - Arn
+        PreSignUp:
+          Fn::GetAtt:
+            - todoappcognitosignuplambda0E710F31
+            - Arn
       Schema:
         - Mutable: true
           Name: email
@@ -29,6 +38,36 @@ Resources:
     DeletionPolicy: Delete
     Metadata:
       aws:cdk:path: CdkTodoAppStack/todo-app-user-pool/Resource
+  todoappuserpoolPreSignUpCognito80B29213:
+    Type: AWS::Lambda::Permission
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName:
+        Fn::GetAtt:
+          - todoappcognitosignuplambda0E710F31
+          - Arn
+      Principal: cognito-idp.amazonaws.com
+      SourceArn:
+        Fn::GetAtt:
+          - todoappuserpoolC22ED3C2
+          - Arn
+    Metadata:
+      aws:cdk:path: CdkTodoAppStack/todo-app-user-pool/PreSignUpCognito
+  todoappuserpoolPostConfirmationCognitoBD7C7835:
+    Type: AWS::Lambda::Permission
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName:
+        Fn::GetAtt:
+          - todoappcognitoconfirmsignuplambda248ABA3F
+          - Arn
+      Principal: cognito-idp.amazonaws.com
+      SourceArn:
+        Fn::GetAtt:
+          - todoappuserpoolC22ED3C2
+          - Arn
+    Metadata:
+      aws:cdk:path: CdkTodoAppStack/todo-app-user-pool/PostConfirmationCognito
   todoappuserpoolclient81F878F3:
     Type: AWS::Cognito::UserPoolClient
     Properties:
@@ -144,7 +183,7 @@ Resources:
       Code:
         S3Bucket:
           Fn::Sub: cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}
-        S3Key: 7967b4b507a5aa52fc8cbf195bcb47c1e16c8cff277bfe3bc557ec36131cefb3.zip
+        S3Key: fcc1d4bd9b65feb58669b500fe942d8c21500d405eac1452bef73898edc2bc77.zip
       Environment:
         Variables:
           COGNITO_USER_POOL_ID:
@@ -165,7 +204,93 @@ Resources:
       - todoapplambdaServiceRoleCFD3B80A
     Metadata:
       aws:cdk:path: CdkTodoAppStack/todo-app-lambda/Resource
-      aws:asset:path: /Users/shohei/project/todo_app/cdk-todo-app/cdk.out/asset.7967b4b507a5aa52fc8cbf195bcb47c1e16c8cff277bfe3bc557ec36131cefb3
+      aws:asset:path: /Users/shohei/project/todo_app/cdk-todo-app/cdk.out/asset.fcc1d4bd9b65feb58669b500fe942d8c21500d405eac1452bef73898edc2bc77
+      aws:asset:is-bundled: true
+      aws:asset:property: Code
+  todoappcognitosignuplambdaServiceRole4C45CF2D:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+          - Action: sts:AssumeRole
+            Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+        Version: "2012-10-17"
+      ManagedPolicyArns:
+        - Fn::Join:
+            - ""
+            - - "arn:"
+              - Ref: AWS::Partition
+              - :iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+    Metadata:
+      aws:cdk:path: CdkTodoAppStack/todo-app-cognito-sign-up-lambda/ServiceRole/Resource
+  todoappcognitosignuplambda0E710F31:
+    Type: AWS::Lambda::Function
+    Properties:
+      Code:
+        S3Bucket:
+          Fn::Sub: cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}
+        S3Key: 5c077bf5111e79af85129217d44c31754ba62513b253534f8d1c507bf3e91d54.zip
+      Environment:
+        Variables:
+          AWS_NODEJS_CONNECTION_REUSE_ENABLED: "1"
+      Handler: index.handler
+      MemorySize: 128
+      Role:
+        Fn::GetAtt:
+          - todoappcognitosignuplambdaServiceRole4C45CF2D
+          - Arn
+      Runtime: nodejs18.x
+      Timeout: 30
+    DependsOn:
+      - todoappcognitosignuplambdaServiceRole4C45CF2D
+    Metadata:
+      aws:cdk:path: CdkTodoAppStack/todo-app-cognito-sign-up-lambda/Resource
+      aws:asset:path: /Users/shohei/project/todo_app/cdk-todo-app/cdk.out/asset.5c077bf5111e79af85129217d44c31754ba62513b253534f8d1c507bf3e91d54
+      aws:asset:is-bundled: true
+      aws:asset:property: Code
+  todoappcognitoconfirmsignuplambdaServiceRoleEE751BFD:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+          - Action: sts:AssumeRole
+            Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+        Version: "2012-10-17"
+      ManagedPolicyArns:
+        - Fn::Join:
+            - ""
+            - - "arn:"
+              - Ref: AWS::Partition
+              - :iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+    Metadata:
+      aws:cdk:path: CdkTodoAppStack/todo-app-cognito-confirm-sign-up-lambda/ServiceRole/Resource
+  todoappcognitoconfirmsignuplambda248ABA3F:
+    Type: AWS::Lambda::Function
+    Properties:
+      Code:
+        S3Bucket:
+          Fn::Sub: cdk-hnb659fds-assets-${AWS::AccountId}-${AWS::Region}
+        S3Key: 71b85334875a67f70641b5c371e16f2c8d0e42a936aa0ab79a65ab9449cdfd3c.zip
+      Environment:
+        Variables:
+          AWS_NODEJS_CONNECTION_REUSE_ENABLED: "1"
+      Handler: index.handler
+      MemorySize: 128
+      Role:
+        Fn::GetAtt:
+          - todoappcognitoconfirmsignuplambdaServiceRoleEE751BFD
+          - Arn
+      Runtime: nodejs18.x
+      Timeout: 30
+    DependsOn:
+      - todoappcognitoconfirmsignuplambdaServiceRoleEE751BFD
+    Metadata:
+      aws:cdk:path: CdkTodoAppStack/todo-app-cognito-confirm-sign-up-lambda/Resource
+      aws:asset:path: /Users/shohei/project/todo_app/cdk-todo-app/cdk.out/asset.71b85334875a67f70641b5c371e16f2c8d0e42a936aa0ab79a65ab9449cdfd3c
       aws:asset:is-bundled: true
       aws:asset:property: Code
   todoapprestapiF3D03277:
@@ -431,7 +556,7 @@ Resources:
   CDKMetadata:
     Type: AWS::CDK::Metadata
     Properties:
-      Analytics: v2:deflate64:H4sIAAAAAAAA/1WQyW7CMBCGn4W7mYpW6nIEqp66INqekbGHMGB7otgpjaK8e70ERE/zzfbPcgtP93A7kSc/Vfo4NbSF/jNIdRQxtOkVV44CQ//tsVkxG7HcuQufYWkIXbhOlcggdOekZR1Fv+TWYCrJMAgj7VbLjWONBw/v2by0TgViJ0ha6NdcGrJdsSHVJbfQIPzdRnqPwcM8mejDolVHDAvpcZSHPjZcVFMzNpa8j94gZE2VDHiSHfSvuXyNPsxrykNHfMbacGfH8668+KQqr1cg1nPbKMzDVw3/dufIqFb4DcOedQoVilvY2tCuy5vO6zqlFo10aj8MF1GRL0yDyFWp4qMNdRv+KUdestMU8m3prXDwNz+zR5g9wGxy8ETTpnWBLMK62D/Pu6vk/AEAAA==
+      Analytics: v2:deflate64:H4sIAAAAAAAA/1WQyW4CMQyGn4V7cAWVuhxZ1FOXEW3PyCRhMGTTJFM6Gs27NwuD6Mmff9u/E8/h+QHmEzz7KRenqaId9J8B+YlFadtzWxsKFvpvL5vKWsVWe3PlEVaKpAm3paIMTKHeCYQ+lirZaPKerEmNL63hIfLARGdQWxH3fuFOyVTMMA5vjRXy6OE9h3GOEWroN7YM5FhZRbxLaaGB+fstei+Dh0UKMYdly08yLNFLho5qDPKMHfSvedVG+rBwlB0vuJZO2U5fvneTxSPVeXeB2G/bhsvsXDX2txuVi1vhNxkOViSp0MBQO0X7Lp9o4VwqLRs0/DAMV1OWn58WkalTx0cbXBv+OUdeWSOoHDXdDI7+7mf2BLNHmE2OnmjatCaQlrAp8Q+ePdqX/AEAAA==
     Metadata:
       aws:cdk:path: CdkTodoAppStack/CDKMetadata/Default
     Condition: CDKMetadataAvailable
