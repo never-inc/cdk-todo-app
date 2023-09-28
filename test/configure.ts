@@ -3,7 +3,7 @@ import { DynamoDBClient } from '@aws-sdk/client-dynamodb'
 
 env.config({ path: '.env.local' })
 
-// DynamoDBClientConfigを設定
+// DynamoDBClientを設定
 jest.mock('../lambda/repositories/dynamo_db_provider', () => {
   const originalModule = jest.requireActual('../lambda/repositories/dynamo_db_provider')
   return {

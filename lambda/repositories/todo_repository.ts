@@ -1,5 +1,4 @@
-import { GetCommand, UpdateCommand, DeleteCommand, QueryCommand } from '@aws-sdk/lib-dynamodb'
-import { PutItemCommand } from '@aws-sdk/client-dynamodb'
+import { PutCommand, GetCommand, UpdateCommand, DeleteCommand, QueryCommand } from '@aws-sdk/lib-dynamodb'
 import { getDocumentClient } from './dynamo_db_provider'
 
 const documentClient = getDocumentClient()
@@ -37,14 +36,14 @@ export const fetchTodos = async (
 
 export const setTodo = async (todoId: string, userId: string, todoText: string) => {
   const dateISOString = new Date().toISOString()
-  const command = new PutItemCommand({
+  const command = new PutCommand({
     TableName: tableName,
     Item: {
-      todoId: { S: todoId },
-      userId: { S: userId },
-      todoText: { S: todoText },
-      createdAt: { S: dateISOString },
-      updatedAt: { S: dateISOString },
+      todoId: todoId,
+      userId: userId,
+      todoText: todoText,
+      createdAt: dateISOString,
+      updatedAt: dateISOString,
     },
     ConditionExpression: 'attribute_not_exists(todoId)', // todoIdが重複しないようにする
   })
