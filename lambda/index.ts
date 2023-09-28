@@ -5,7 +5,8 @@ import express from 'express'
 import { verifyAccessToken } from './repositories/auth_repository'
 import * as todo_repository from './repositories/todo_repository'
 
-const app = express()
+export const app = express()
+
 app.use(express.json())
 app.use((req, res, next) => {
   // CORSエラーを解消
