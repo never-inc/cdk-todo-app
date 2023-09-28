@@ -1,21 +1,22 @@
 import * as env from 'dotenv'
+import { DynamoDBClient } from '@aws-sdk/client-dynamodb'
 
 env.config({ path: '.env.local' })
 
 // DynamoDBClientConfigを設定
-export const dynamoDbClientConfigure = () => {
-  jest.mock('../lambda/repositories/todo_repository', () => {
-    return {
-      DynamoDBClientConfig: jest.fn().mockImplementation(() => {
-        return {
-          endpoint: process.env.DYNAMODB_ENDPOINT,
-          region: process.env.DYNAMODB_REGION ?? 'ap-northeast-1',
-          credentials: {
-            accessKeyId: process.env.DYNAMODB_ACCESS_KEY_ID,
-            secretAccessKey: process.env.DYNAMODB_SECRET_ACCESS_KEY,
-          },
-        }
-      }),
-    }
-  })
-}
+jest.mock('../lambda/repositories/dynamo_db_provider', () => {
+  const originalModule = jest.requireActual('../lambda/repositories/dynamo_db_provider')
+  return {
+    ...originalModule,
+    getDocumentClient: jest.fn().mockImplementation(() => {
+      return new DynamoDBClient({
+        endpoint: process.env.DYNAMODB_ENDPOINT,
+        region: process.env.DYNAMODB_REGION,
+        credentials: {
+          accessKeyId: process.env.DYNAMODB_ACCESS_KEY_ID ?? '',
+          secretAccessKey: process.env.DYNAMODB_SECRET_ACCESS_KEY ?? '',
+        },
+      })
+    }),
+  }
+})

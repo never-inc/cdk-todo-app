@@ -1,13 +1,8 @@
-import { dynamoDbClientConfigure } from '../configure'
+import '../configure'
 import * as todo_repository from '../../lambda/repositories/todo_repository'
 import { v4 } from 'uuid'
 
 describe('todo_repository', (): void => {
-  // テスト開始前に1度だけ呼ばれる
-  beforeAll(() => {
-    dynamoDbClientConfigure() // DynamoDBClientConfigを設定
-  })
-
   // テスト開始後に1度だけ呼ばれる
   afterAll(() => {
     jest.clearAllMocks()
